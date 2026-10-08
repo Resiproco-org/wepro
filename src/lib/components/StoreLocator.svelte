@@ -1,0 +1,10 @@
+<script lang="ts">
+  import { stores } from '#lib/data';
+  import { useDemo } from '#lib/demo.svelte';
+  const demo = useDemo();
+  let query = $state('');
+  let searched = $state('');
+  let selected = $state(1);
+  const results = $derived(stores.filter((s) => `${s.city} ${s.postal}`.toLowerCase().includes(searched.toLowerCase())));
+</script>
+<div class="grid cols-2"><div><div class="eyebrow">{demo.t('CERCA DE TI · DEMO', 'NEAR YOU · DEMO')}</div><h2>{demo.t('¿Prefieres comprar en tienda?', 'Prefer to shop in store?')}</h2><p>{demo.t('Puntos de venta ficticios para probar el localizador.', 'Fictional stores for testing the locator.')}</p><form class="row" onsubmit={(e) => { e.preventDefault(); searched = query.trim(); }}><label class="grow">{demo.t('Código postal o ciudad', 'Postal code or city')}<input bind:value={query} placeholder="Barcelona / 08001"/></label><button>{demo.t('Buscar', 'Search')}</button></form><button class="text-button" style="margin:12px 0" onclick={() => { query = 'Barcelona'; searched = 'Barcelona'; selected = 1; demo.notice = demo.t('Ubicación simulada: Barcelona. No accedemos al GPS.', 'Simulated location: Barcelona. We do not access GPS.'); }}>{demo.t('Usar ubicación simulada', 'Use simulated location')}</button>{#each results as store}<button class="secondary wide" style="margin:6px 0" onclick={() => selected = store.id}>{store.name} · {store.postal}</button>{:else}<p>{demo.t('Sin resultados. Prueba Barcelona, Madrid o Valencia.', 'No results. Try Barcelona, Madrid or Valencia.')}</p>{/each}</div><div class="map" aria-label={demo.t('Mapa esquemático de muestra', 'Sample schematic map')}>{#each results as store}<button style={`left:${store.x}%;top:${store.y}%;background:${selected === store.id ? '#bd400b' : '#20231e'}`} aria-label={store.name} onclick={() => selected = store.id}>{store.id}</button>{/each}<p style="position:absolute;bottom:12px;left:20px;background:white;padding:10px;font-size:12px">{stores.find((s) => s.id === selected)?.name} · {demo.t('Mapa demo, sin cartografía real', 'Demo map, no real cartography')}</p></div></div>

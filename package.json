@@ -1,0 +1,32 @@
+{
+  "name": "wepro-local-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "imports": { "#lib/*": "./src/lib/*" },
+  "packageManager": "pnpm@11.4.0",
+  "engines": { "node": ">=22.17" },
+  "scripts": {
+    "dev": "vite dev --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "8.0.0",
+    "@sveltejs/kit": "3.0.1",
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "@tailwindcss/vite": "4.3.3",
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^24.0.0",
+    "svelte": "5.57.2",
+    "svelte-check": "^4.4.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "^6.0.0",
+    "vite": "8.3.4",
+    "vitest": "^4.0.0"
+  },
+  "dependencies": { "@opentelemetry/api": "^1.9.0" }
+}

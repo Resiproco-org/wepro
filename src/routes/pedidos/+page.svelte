@@ -1,0 +1,6 @@
+<script lang="ts">
+  import { useDemo } from '#lib/demo.svelte';
+  import { money } from '#lib/pricing';
+  const demo = useDemo();
+</script>
+<section class="section"><div class="container"><h1>{demo.t('Mis pedidos ficticios','My fictional orders')}</h1><p>{demo.t('Solo existen en este navegador. No se han cobrado ni enviado.','These only exist in this browser. No charge or shipment has occurred.')}</p>{#each demo.state.orders as order}<a href={`/pedidos/${order.id}`} class="door" style="margin:20px 0"><span>{order.id} · {new Date(order.created).toLocaleDateString(demo.state.language)}</span><strong>{money(order.total,demo.state.language)} →</strong></a>{:else}<div class="empty"><p>{demo.t('Aún no hay pedidos de muestra.','No sample orders yet.')}</p><a class="button" href="/tienda">{demo.t('Explorar tienda','Explore shop')}</a></div>{/each}<div class="callout"><h3>{demo.t('Recuperación de carrito · simulada','Cart recovery · simulated')}</h3><p>{demo.t('Los recordatorios de 1 h, 24 h y 72 h se muestran como ejemplos; no se envían emails. Tu carrito sigue disponible localmente.','The 1 h, 24 h and 72 h reminders are examples; no emails are sent. Your cart remains available locally.')}</p><a class="button secondary" href="/carrito">{demo.t('Recuperar mi carrito local','Recover my local cart')}</a></div></div></section>

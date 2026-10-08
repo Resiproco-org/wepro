@@ -1,0 +1,123 @@
+import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
+async function noOverflow(page: Page) { expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true); }
+async function visit(page: Page, path: string) { await page.goto(path); await expect(page.locator('main')).toHaveAttribute('data-ready','true'); }
+test.beforeEach(async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  (page as Page & { demoErrors: string[] }).demoErrors = errors;
+});
+test.afterEach(async ({ page }) => { expect((page as Page & { demoErrors: string[] }).demoErrors).toEqual([]); });
+test('home → recommender → wooden table → edited kit → fictional order', async ({ page }, testInfo) => {
+  await visit(page,'/');
+  await expect(page.getByRole('heading', { name: 'Hazlo tú.' })).toBeVisible();
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('home.png'), fullPage: true });
+  await page.getByRole('link', { name:'Encontrar mi proyecto', exact:false }).first().click();
+  await page.getByLabel('Renovar un mueble', { exact:true }).check();
+  await page.getByLabel('Madera', { exact:true }).check();
+  await page.getByLabel('Interior', { exact:true }).check();
+  await page.getByLabel('Satinado', { exact:true }).check();
+  await page.reload();
+  await expect(page.getByLabel('Satinado', { exact:true })).toBeChecked();
+  await page.getByRole('link', { name:'Ver proyecto y editar kit' }).click();
+  await expect(page.getByRole('heading', { level:1 })).toHaveText('Cómo reparar y renovar una mesa de madera');
+  await noOverflow(page);
+  const kit = page.locator('#kit');
+  await kit.getByRole('button', { name:'Kit completo + herramientas' }).click();
+  await kit.getByLabel('Incluir Masilla para madera').uncheck();
+  await kit.locator('.kit-item').filter({ hasText:'Pintura Water Based' }).getByRole('combobox').selectOption('pintura-water-based-1-1-satin');
+  await kit.getByRole('button', { name:'Añadir kit al carrito' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name:'Aumentar cantidad' }).click();
+  await dialog.getByRole('link', { name:'Abrir carrito completo' }).click();
+  await expect(page).toHaveURL(/\/carrito$/);
+  await page.reload();
+  await expect(page.locator('.cart-line .quantity span')).toHaveText('2');
+  await page.getByRole('link', { name:'Editar kit', exact:true }).click();
+  await expect(page).toHaveURL(/edit=/);
+  await expect(page.locator('#kit').getByLabel('Incluir Masilla para madera')).not.toBeChecked();
+  await expect(page.locator('#kit .kit-item').filter({ hasText:'Pintura Water Based' }).getByRole('combobox')).toHaveValue('pintura-water-based-1-1-satin');
+  await page.locator('#kit').getByLabel('Incluir Masilla para madera').check();
+  await page.locator('#kit').getByRole('button', { name:'Actualizar kit en carrito' }).click();
+  await page.getByRole('dialog').getByRole('link', { name:'Abrir carrito completo' }).click();
+  await expect(page).toHaveURL(/\/carrito$/);
+  await page.getByLabel('Código de muestra: DEMO10').fill('DEMO10');
+  await page.getByRole('button', { name:'Aplicar',exact:true }).click();
+  await expect(page.getByText('Descuento demo aplicado', { exact:true })).toBeVisible();
+  await noOverflow(page);
+  await page.getByRole('button', { name:'Crear pedido ficticio local' }).click();
+  await expect(page).toHaveURL(/\/pedidos\/DEMO-/);
+  await expect(page.getByText('Este pedido es ficticio y local. No se ha cobrado ni se enviará nada.')).toBeVisible();
+  await page.getByRole('button', { name:'Avanzar entrega simulada' }).click();
+  await page.reload();
+  await expect(page.getByText('Estado ficticio: Preparando', { exact:true })).toBeVisible();
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('order.png'), fullPage:true });
+});
+test('catalog → product variants → cart, stock state and English persistence', async ({ page }, testInfo) => {
+  await visit(page,'/productos');
+  await page.getByLabel('Buscar producto, color o RAL').fill('Water Based');
+  await expect(page.locator('.product-card')).toHaveCount(1);
+  await page.getByRole('link', { name:'Ver producto',exact:true }).click();
+  await expect(page).toHaveURL(/\/productos\/pintura-water-based$/);
+  await page.getByRole('combobox', { name:'Formato', exact:true }).selectOption('200 ml');
+  await page.getByRole('button', { name:'Negro demo RAL 9005',exact:true }).click();
+  await expect(page.getByRole('button', { name:'Avísame · simulación' })).toBeVisible();
+  await page.getByRole('button', { name:'Avísame · simulación' }).click();
+  await page.getByRole('button', { name:'Verde demo RAL 6003',exact:true }).click();
+  await page.getByRole('combobox', { name:'Acabado', exact:true }).selectOption('satin');
+  await page.getByRole('button', { name:'Aumentar cantidad' }).click();
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('product.png'), fullPage:true });
+  await page.getByRole('button', { name:'Añadir al carrito',exact:true }).click();
+  await expect(page.getByRole('dialog').getByText('200 ml · Verde demo RAL 6003 · satin')).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name:'Cerrar ×' }).click();
+  await page.getByLabel('Idioma',{exact:true}).selectOption('en');
+  await page.reload();
+  await expect(page.getByRole('button', { name:'Add to cart',exact:true })).toBeVisible();
+  await page.getByRole('button', { name:/Cart/ }).click();
+  await expect(page.getByRole('dialog').locator('.quantity span')).toHaveText('2');
+  await page.getByRole('dialog').getByRole('button', { name:'Remove',exact:true }).click();
+  await expect(page.getByRole('dialog').getByText('Your next project starts here.')).toBeVisible();
+});
+test('filters, mobile menu, locator, animation, favorites and reset', async ({ page }, testInfo) => {
+  await visit(page,'/');
+  if (testInfo.project.name === 'mobile') { await page.getByRole('button',{name:'Menú',exact:true}).click(); await page.getByRole('navigation').getByRole('link',{name:'Proyectos',exact:true}).click(); }
+  else await page.getByRole('navigation').getByRole('link',{name:'Proyectos',exact:true}).click();
+  if (testInfo.project.name === 'mobile') await page.getByRole('button',{name:/Filtrar/}).click();
+  await page.getByLabel('Madera',{exact:true}).check();
+  await expect(page.locator('main .card')).toHaveCount(1);
+  await page.getByRole('link',{name:'Ver qué necesito →',exact:true}).click();
+  await page.getByRole('button',{name:'Guardar proyecto',exact:false}).click();
+  await visit(page,'/favoritos');
+  await expect(page.locator('main .card')).toHaveCount(1);
+  await visit(page,'/tiendas');
+  await page.getByLabel('Código postal o ciudad').fill('Madrid');
+  await page.locator('main').getByRole('button',{name:'Buscar',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Taller Madrid · demo · 28001'})).toBeVisible();
+  await visit(page,'/aprender/pasadas');
+  await page.getByRole('button',{name:'▶ Reproducir demo'}).click();
+  await expect(page.getByRole('button',{name:'Pausar'})).toBeVisible();
+  await page.getByRole('button',{name:'Reiniciar demo',exact:true}).click();
+  await visit(page,'/favoritos');
+  await expect(page.locator('main .card')).toHaveCount(0);
+  await noOverflow(page);
+});
+test('all rendered local links resolve and fragment targets exist', async ({ page, request }) => {
+  const routes = ['/', '/proyectos','/productos','/tienda','/como-se-hace','/proyectos/renovar-mesa-madera','/productos/pintura-water-based','/aprender/mesa','/guia','/tiendas','/ayuda','/pedidos','/carrito','/favoritos'];
+  const checked = new Set<string>();
+  for (const route of routes) {
+    await visit(page,route);
+    await noOverflow(page);
+    const links = await page.locator('a[href]').evaluateAll((elements) => elements.map((e) => (e as HTMLAnchorElement).href));
+    for (const href of links) {
+      const url = new URL(href); if (url.origin !== 'http://127.0.0.1:5187') continue;
+      if (url.pathname === new URL(page.url()).pathname && url.hash) expect(await page.locator(`[id="${decodeURIComponent(url.hash.slice(1))}"]`).count(),href).toBeGreaterThan(0);
+      url.hash = ''; if (checked.has(url.href)) continue; checked.add(url.href);
+      expect((await request.get(url.href)).status(),url.href).toBeLessThan(400);
+    }
+  }
+});

@@ -1,0 +1,10 @@
+<script lang="ts">
+  import { useDemo } from '#lib/demo.svelte';
+  import { productById } from '#lib/data';
+  import type { Article } from '#lib/types';
+  import DemoVideo from '#lib/components/DemoVideo.svelte';
+  import ProductCard from '#lib/components/ProductCard.svelte';
+  let { data }: { data: { article: Article } } = $props();
+  const demo = useDemo();
+</script>
+<section class="section cream"><div class="container" style="max-width:900px"><div class="breadcrumb"><a href="/como-se-hace#biblioteca">{demo.t('Biblioteca','Library')}</a> / DEMO</div><h1>{data.article.title[demo.state.language]}</h1><p class="demo-note">{demo.t('Artículo de ejemplo. No contiene instrucciones técnicas aprobadas.','Example article. Does not contain approved technical instructions.')}</p>{#if ['short','video'].includes(data.article.kind)}<DemoVideo title={data.article.title[demo.state.language]}/>{/if}<div class="card card-body" style="margin:25px 0"><h2>{demo.t('Una idea, cuatro fases','One idea, four phases')}</h2><p>{demo.t('Antes de elegir productos, identifica el material, su estado y el acabado que buscas. En este prototipo puedes probar una selección de muestra y preparar un kit editable.','Before choosing products, identify the material, its condition and the finish you want. In this prototype you can try a sample selection and prepare an editable kit.')}</p><p>{demo.t('REPARA → PREPARA → PINTA → PROTEGE. La compatibilidad y los tiempos de una aplicación real deben proceder de documentación aprobada.','REPAIR → PREPARE → PAINT → PROTECT. Compatibility and timing for real application must come from approved documentation.')}</p><div class="row"><a class="button" href="/como-se-hace">{demo.t('Encontrar mi proyecto','Find my project')}</a><a class="button secondary" href="/guia">{demo.t('Abrir guía imprimible','Open printable guide')}</a></div></div><h2>{demo.t('Producto vinculado de muestra','Linked sample product')}</h2><div style="max-width:350px"><ProductCard product={productById(data.article.productId)}/></div></div></section>
