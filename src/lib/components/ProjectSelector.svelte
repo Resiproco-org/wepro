@@ -120,31 +120,34 @@
 </div>
 
 <style>
-  .selector-intro { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 12px 0 32px; }
-  .selector-intro p { color: #ced4c5; max-width: 580px; margin: 0; }
-  .selector-intro button { flex-shrink: 0; }
-  .selection-columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .selector-intro { display: flex; align-items: center; justify-content: space-between; gap: 32px; margin: 20px 0 52px; }
+  .selector-intro p { color: var(--muted); max-width: 860px; margin: 0; font-size: clamp(16px, 1.5vw, 22px); line-height: 1.6; }
+  .selector-intro button { flex-shrink: 0; background: var(--ink); color: white; border-color: var(--ink); padding: 17px 28px; border-radius: 999px; font-size: 16px; }
+  .selector-intro button:hover { background: #414735; }
+  .selector-intro button span { font-size: 24px; font-weight: 400; line-height: 1; margin-right: 4px; }
+  .selection-columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
   .selection-step { min-width: 0; }
-  .step-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
-  .number { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #738063; border-radius: 50%; color: var(--lime); font-size: 12px; letter-spacing: .05em; }
-  .selection-card { padding: 12px; border: 1px solid #56624b; background: #30382a; border-radius: 24px; transition: border-color 180ms, transform 180ms; }
-  .selection-card:focus-within { border-color: var(--lime); transform: translateY(-3px); }
-  .selection-image { overflow: hidden; border-radius: 16px; aspect-ratio: 230 / 210; }
+  .step-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; font-size: clamp(15px, 1.4vw, 21px); font-weight: 400; }
+  .number { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid #c5c8b5; border-radius: 50%; color: var(--ink); background: #edeee4; font-size: 19px; flex-shrink: 0; }
+  .selection-step:first-child .number { border-color: transparent; }
+  .selection-card { padding: 14px; border: 1px solid var(--line); background: #ffffffb8; border-radius: 28px; box-shadow: 0 18px 40px #5b493208; transition: border-color 180ms, transform 180ms, box-shadow 180ms; }
+  .selection-card:focus-within { border-color: #929b78; transform: translateY(-3px); box-shadow: 0 20px 40px #5b493212; }
+  .selection-image { overflow: hidden; border-radius: 18px; aspect-ratio: 1.04; background: #eeebe5; }
   .visual-enter { animation: selection-in 280ms ease-out; height: 100%; }
   .selection-card label { margin-top: 14px; }
   .selection-card label > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .selection-card select { background: #252d20; color: #fff; border-color: #657258; font-size: 13px; padding-inline: 10px; cursor: pointer; }
+  .selection-card select { background-color: #fffdfb; color: var(--ink); border-color: #ded8ce; border-radius: 18px; font-size: clamp(13px, 1.15vw, 18px); font-weight: 400; padding: 17px 36px 17px 16px; cursor: pointer; min-height: 58px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='m3 6 6 6 6-6' fill='none' stroke='%23252a20' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; }
   .collection-connector { display: flex; justify-content: center; height: 56px; }
-  .collection-connector span { display: grid; place-items: center; width: 1px; background: #657258; color: var(--lime); font-size: 23px; }
-  .collection-panel { border: 1px solid #657258; border-radius: 26px; padding: 28px; background: #f3f5ed; color: var(--ink); }
+  .collection-connector span { display: grid; place-items: center; width: 1px; background: #d2d1c4; color: #788061; font-size: 23px; }
+  .collection-panel { border: 1px solid var(--line); border-radius: 28px; padding: 32px; background: #ffffffbd; color: var(--ink); box-shadow: 0 20px 60px #5b493208; }
   .collection-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 24px; }
   .collection-heading .eyebrow { color: #5d6552; margin-bottom: 8px; }
   .collection-heading h3 { font-size: clamp(25px, 3vw, 32px); margin-bottom: 8px; letter-spacing: -.04em; }
   .collection-heading p { margin: 0; color: #64695c; }
-  .selection-badge { background: #e2ebcf; border-radius: 24px; padding: 10px 14px; font-size: 12px; white-space: nowrap; }
+  .selection-badge { background: #edeee4; border-radius: 24px; padding: 10px 14px; font-size: 12px; white-space: nowrap; }
   .collection-layout { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; }
   .collection-products { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
-  .collection-product { display: block; background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #dce1d2; height: 100%; transition: border-color 180ms; }
+  .collection-product { display: block; background: #fffdfb; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); height: 100%; transition: border-color 180ms; }
   .collection-product:hover { border-color: #849c48; text-decoration: none; }
   .collection-product :global(.artwork) { display: block; width: 100%; aspect-ratio: 1.1; }
   .product-copy { padding: 14px; }
@@ -152,7 +155,7 @@
   h4 { font-size: 13px; line-height: 1.4; margin: 8px 0; }
   .product-detail { display: block; font-size: 11px; color: #64695c; line-height: 1.5; }
   .product-copy strong { display: block; margin-top: 12px; font-size: 15px; }
-  .order-summary { display: flex; flex-direction: column; align-items: flex-start; padding: 22px; border-radius: 18px; background: #e5edda; }
+  .order-summary { display: flex; flex-direction: column; align-items: flex-start; padding: 22px; border-radius: 20px; background: #eeeee5; }
   .summary-label { font-size: 9px; letter-spacing: .1em; margin-bottom: 18px; }
   .subtotal { font-size: 13px; text-decoration: line-through; color: #64695c; margin-bottom: 6px; }
   .order-summary .price { font-size: 36px; }
@@ -172,12 +175,13 @@
     .subtotal { margin: 0; }
   }
   @media (max-width: 650px) {
-    .selector-intro { align-items: flex-start; flex-direction: column; gap: 16px; }
+    .selector-intro { align-items: flex-start; flex-direction: column; gap: 20px; margin-bottom: 32px; }
+    .selector-intro button { font-size: 14px; padding: 13px 21px; }
     .selection-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
     .step-heading { gap: 8px; font-size: 12px; margin-bottom: 10px; }
-    .number { width: 32px; height: 32px; font-size: 10px; }
+    .number { width: 36px; height: 36px; font-size: 13px; }
     .selection-card { padding: 8px; border-radius: 18px; }
-    .selection-card select { font-size: 12px; padding-inline: 6px; }
+    .selection-card select { font-size: 12px; padding: 12px 26px 12px 8px; border-radius: 12px; background-position: right 8px center; background-size: 12px; min-height: 48px; }
     .collection-panel { padding: 18px; border-radius: 22px; }
     .collection-heading { flex-direction: column; gap: 12px; }
     .collection-products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
